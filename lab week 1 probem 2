@@ -1,0 +1,30 @@
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+bool operatorCheck(string userInput) {
+    
+    for (int i = 0; i < userInput.length(); i++) {
+        char c = userInput[i];
+        
+        if (c == 37 || c == 42 || c == 43 || c == 45 || c == 47) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    string userInput;
+    cout << "Enter your input: ";
+    cin >> userInput;
+
+    if (operatorCheck(userInput)) {
+        cout << "Input contains an operator." << endl;
+    } else {
+        cout << "Input does not contain an operator." << endl;
+    }
+
+    return 0;
+}
