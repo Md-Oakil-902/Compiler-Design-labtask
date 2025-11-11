@@ -1,0 +1,24 @@
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string input;
+    cout << "Enter a line: ";
+    getline(cin, input); // take full line as input
+
+    // Check for single-line comment
+    if (input.substr(0, 2) == "//") {
+        cout << "It is a single-line comment." << endl;
+    }
+    // Check for multi-line comment
+    else if (input.substr(0, 2) == "/*" && input.size() >= 4 && input.substr(input.size() - 2, 2) == "*/") {
+        cout << "It is a multi-line comment." << endl;
+    }
+    else {
+        cout << "It is not a comment line." << endl;
+    }
+
+    return 0;
+}
