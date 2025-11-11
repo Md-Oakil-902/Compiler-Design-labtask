@@ -1,0 +1,28 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace std;
+
+bool isIdentifier(string s) {
+    if (s.empty()) return false;
+    if (!(isalpha(s[0]) || s[0] == '_')) return false;
+
+    for (int i = 1; i < s.size(); i++) {
+        if (!(isalnum(s[i]) || s[i] == '_'))
+            return false;
+    }
+    return true;
+}
+
+int main() {
+    string str;
+    cout << "Enter a string: ";
+    cin >> str;
+
+    if (isIdentifier(str))
+        cout << "Valid identifier" << endl;
+    else
+        cout << "Not a valid identifier" << endl;
+
+    return 0;
+}
