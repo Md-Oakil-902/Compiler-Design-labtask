@@ -1,0 +1,11 @@
+int main(){
+
+
+char c;
+c = 'x';
+
+add(1.2);
+count<<"Hello";
+return 0;
+
+}
