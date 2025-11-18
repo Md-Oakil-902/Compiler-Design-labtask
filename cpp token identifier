@@ -1,118 +1,106 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <vector>
 #include <cctype>
+#include <cstring>
 using namespace std;
 
-// List of keywords
-vector<string> keywords = {
-    "int", "float", "double", "char", "if", "else", "for", "while",
-    "return", "break", "continue", "void", "long", "short", "bool"
-};
-
-// Check if token is keyword
-bool isKeyword(const string &token) {
-    for (auto &k : keywords) {
-        if (k == token)
+// Check if token is a keyword
+bool isKeywordToken(const char str[]) {
+    const char* keyList[] = {
+        "int", "float", "if", "else", "while", "for", "return", "char", "double", "void"
+    };
+    for (int i = 0; i < 10; i++) {
+        if (strcmp(str, keyList[i]) == 0)
             return true;
     }
     return false;
 }
 
-// Check if identifier (starts with letter or _)
-bool isIdentifier(const string &token) {
-    if (!isalpha(token[0]) && token[0] != '_')
-        return false;
-
-    for (char c : token) {
-        if (!isalnum(c) && c != '_')
-            return false;
-    }
+// Check if token is a numeric constant
+bool isNumeric(const char str[]) {
+    if (str[0] == '\0') return false;
+    for (int i = 0; str[i] != '\0'; i++)
+        if (!isdigit(str[i])) return false;
     return true;
 }
 
-// Check if number literal
-bool isNumber(const string &token) {
-    for (char c : token) {
-        if (!isdigit(c))
-            return false;
-    }
+// Check if token is an identifier
+bool isIdentifierToken(const char str[]) {
+    if (!isalpha(str[0]) && str[0] != '_') return false;
+    for (int i = 1; str[i] != '\0'; i++)
+        if (!isalnum(str[i]) && str[i] != '_') return false;
     return true;
 }
 
-// Operators list
-vector<string> operators = { "+", "-", "*", "/", "=", "==", ">", "<", ">=", "<=", "!=" };
-
-// Check if operator
-bool isOperator(const string &token) {
-    for (auto &op : operators) {
-        if (op == token)
+// Check if token is an operator
+bool isOperatorToken(const char* str) {
+    const char* operators[] = {"+", "-", "*", "/", "=", "==", "<", ">", "<=", ">=", "!="};
+    for (int i = 0; i < 11; i++)
+        if (strcmp(str, operators[i]) == 0)
             return true;
-    }
     return false;
+}
+
+// Check if token is a symbol
+bool isSymbolToken(const char* str) {
+    const char symbols[] = ";,(){}[]";
+    return (str[0] != '\0' && str[1] == '\0' && strchr(symbols, str[0]));
 }
 
 int main() {
-    ifstream file("input.txt");
-    if (!file.is_open()) {
-        cout << "Error opening file!" << endl;
-        return 0;
+    ifstream fin("input.txt");
+    if (!fin) {
+        cerr << "Unable to open input.txt\n";
+        return 1;
     }
 
-    string line, word;
+    cout << "Token\t\tType\n------------------\n";
 
-    cout << "TOKENS FOUND:\n\n";
+    char buffer[512];
+    while (fin.getline(buffer, 512)) {
+        char token[128];
+        int pos = 0;
 
-    while (getline(file, line)) {
-        string token = "";
+        for (int i = 0; buffer[i] != '\0'; i++) {
+            char ch = buffer[i];
 
-        for (int i = 0; i < line.length(); i++) {
-            char c = line[i];
+            // Delimiters include whitespace, symbols, and operators
+            if (isspace(ch) || strchr(";,(){}[]+-*/=<>!", ch)) {
 
-            // If space or punctuation → process token
-            if (isspace(c) || ispunct(c)) {
-                if (!token.empty()) {
-                    if (isKeyword(token))
-                        cout << token << " -> KEYWORD\n";
-                    else if (isNumber(token))
-                        cout << token << " -> NUMBER LITERAL\n";
-                    else if (isIdentifier(token))
-                        cout << token << " -> IDENTIFIER\n";
+                if (pos > 0) {
+                    token[pos] = '\0';
+
+                    if (isKeywordToken(token))
+                        cout << token << "\t\tKeyword\n";
+                    else if (isNumeric(token))
+                        cout << token << "\t\tNumber\n";
+                    else if (isIdentifierToken(token))
+                        cout << token << "\t\tIdentifier\n";
                     else
-                        cout << token << " -> UNKNOWN TOKEN\n";
+                        cout << token << "\t\tConstant\n";
 
-                    token = "";
+                    pos = 0;
                 }
 
-                // Check punctuation as separate token
-                if (ispunct(c)) {
-                    string op(1, c);
-
-                    if (isOperator(op))
-                        cout << op << " -> OPERATOR\n";
-                    else
-                        cout << op << " -> PUNCTUATION\n";
+                // Handle symbols
+                if (strchr(";,(){}[]", ch)) {
+                    cout << ch << "\t\tSymbol\n";
                 }
+                // Handle operators (including two-character operators)
+                else if (strchr("+-*/=<>!", ch)) {
+                    char op[3] = {ch, '\0', '\0'};
+                    if ((ch == '=' || ch == '<' || ch == '>' || ch == '!') && buffer[i + 1] == '=') {
+                        op[1] = '=';
+                        i++;
+                    }
+                    cout << op << "\t\tOperator\n";
+                }
+            } else {
+                token[pos++] = ch;
             }
-            else {
-                token += c;
-            }
-        }
-
-        // Process leftover token
-        if (!token.empty()) {
-            if (isKeyword(token))
-                cout << token << " -> KEYWORD\n";
-            else if (isNumber(token))
-                cout << token << " -> NUMBER LITERAL\n";
-            else if (isIdentifier(token))
-                cout << token << " -> IDENTIFIER\n";
-            else
-                cout << token << " -> UNKNOWN TOKEN\n";
         }
     }
 
-    file.close();
+    fin.close();
     return 0;
 }
